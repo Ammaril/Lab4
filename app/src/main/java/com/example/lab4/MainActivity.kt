@@ -92,7 +92,20 @@ fun MainScreen() {
                     return@Button
                 }
 
-                resultText = "Валидация пройдена. x = $x, ε = $epsilon"
+                // Вычисление ряда: 1/x - 1/(3x³) + 1/(5x⁵) - 1/(7x⁷) + ...
+                var term = 1.0 / x
+                var sum = 0.0
+                var count = 0
+                var n = 0
+
+                while (abs(term) >= epsilon) {
+                    sum += term
+                    count++
+                    term = term * (-1.0) / (x * x) * (2.0 * n + 1) / (2.0 * n + 3)
+                    n++
+                }
+
+                resultText = "Сумма: $sum\nИтераций: $count"
             },
             modifier = Modifier.fillMaxWidth()
         ) {
