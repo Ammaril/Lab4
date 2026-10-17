@@ -122,8 +122,13 @@ fun MainScreen() {
                 }
                 termForDisplay = t
 
+                val exact = kotlin.math.atan(1.0 / x)
+                val error = abs(sum - exact)
+
                 resultText = """
                     Сумма ряда: ${"%.8f".format(sum)}
+                    Точное значение arctan(1/x): ${"%.8f".format(exact)}
+                    Погрешность: ${"%.8f".format(error)}
                     Последнее добавленное слагаемое: ${"%.8f".format(lastAddedTerm)}
                     Слагаемое, на котором остановились (< ε): ${"%.8f".format(termForDisplay)}
                     Количество итераций цикла: $count
