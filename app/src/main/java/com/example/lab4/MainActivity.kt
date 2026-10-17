@@ -23,7 +23,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.lab4.ui.theme.Lab4Theme
 import kotlin.math.abs
+import kotlin.math.atan
 
+/**
+ * Лабораторная работа №2: Циклы
+ * Вариант 2: Вычисление ряда 1/x - 1/(3x³) + 1/(5x) - 1/(7x⁷) + ...
+ *
+ * Ряд сходится при |x| > 1 и представляет собой разложение arctan(1/x)
+ * Используется цикл while с неизвестным количеством итераций
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +51,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
+
+    // Состояния для полей ввода и результата
     var xText by remember { mutableStateOf("") }
     var epsText by remember { mutableStateOf("") }
     var resultText by remember { mutableStateOf("") }
@@ -54,6 +64,7 @@ fun MainScreen() {
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
+        // Поле ввода x
         OutlinedTextField(
             value = xText,
             onValueChange = { xText = it },
@@ -61,6 +72,7 @@ fun MainScreen() {
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
 
+        // Поле ввода точности epsilon
         OutlinedTextField(
             value = epsText,
             onValueChange = { epsText = it },
@@ -68,11 +80,13 @@ fun MainScreen() {
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
         )
 
+        // Кнопка вычисления
         Button(
             onClick = {
                 val x = xText.toDoubleOrNull()
                 val epsilon = epsText.toDoubleOrNull()
 
+                // Валидация ввода
                 if (x == null || epsilon == null || epsilon <= 0) {
                     Toast.makeText(context, "Введите корректные числа!", Toast.LENGTH_SHORT).show()
                     return@Button
@@ -83,6 +97,7 @@ fun MainScreen() {
                     return@Button
                 }
 
+                // Проверка условия сходимости ряда
                 if (abs(x) <= 1.0) {
                     Toast.makeText(
                         context,
@@ -92,45 +107,35 @@ fun MainScreen() {
                     return@Button
                 }
 
-                // Вычисление ряда: 1/x - 1/(3x³) + 1/(5x⁵) - 1/(7x⁷) + ...
+                // Вычисление ряда с использованием рекуррентной формулы:
+                // a_0 = 1/x
+                // a_{n+1} = a_n * (-1/x²) * (2n+1)/(2n+3)
                 var term = 1.0 / x
                 var sum = 0.0
                 var count = 0
+                var lastAddedTerm = 0.0
                 var n = 0
 
+                // Цикл продолжается, пока модуль слагаемого >= epsilon
                 while (abs(term) >= epsilon) {
                     sum += term
+                    lastAddedTerm = term
                     count++
                     term = term * (-1.0) / (x * x) * (2.0 * n + 1) / (2.0 * n + 3)
                     n++
                 }
 
-                var lastAddedTerm = 0.0
-                var termForDisplay = term
-
-                // Пересчёт с сохранением последнего слагаемого
-                var t = 1.0 / x
-                sum = 0.0
-                count = 0
-                n = 0
-                while (abs(t) >= epsilon) {
-                    sum += t
-                    lastAddedTerm = t
-                    count++
-                    t = t * (-1.0) / (x * x) * (2.0 * n + 1) / (2.0 * n + 3)
-                    n++
-                }
-                termForDisplay = t
-
-                val exact = kotlin.math.atan(1.0 / x)
+                // Контроль результата: сравнение с точным значением arctan(1/x)
+                val exact = atan(1.0 / x)
                 val error = abs(sum - exact)
 
+                // Форматирование и вывод результатов
                 resultText = """
                     Сумма ряда: ${"%.8f".format(sum)}
                     Точное значение arctan(1/x): ${"%.8f".format(exact)}
                     Погрешность: ${"%.8f".format(error)}
                     Последнее добавленное слагаемое: ${"%.8f".format(lastAddedTerm)}
-                    Слагаемое, на котором остановились (< ε): ${"%.8f".format(termForDisplay)}
+                    Слагаемое, на котором остановились (< ε): ${"%.8f".format(term)}
                     Количество итераций цикла: $count
                 """.trimIndent()
             },
@@ -139,6 +144,7 @@ fun MainScreen() {
             Text("Вычислить")
         }
 
+        // Вывод результата
         Text(
             text = resultText,
             modifier = Modifier.padding(top = 24.dp)
