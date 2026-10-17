@@ -105,7 +105,29 @@ fun MainScreen() {
                     n++
                 }
 
-                resultText = "Сумма: $sum\nИтераций: $count"
+                var lastAddedTerm = 0.0
+                var termForDisplay = term
+
+                // Пересчёт с сохранением последнего слагаемого
+                var t = 1.0 / x
+                sum = 0.0
+                count = 0
+                n = 0
+                while (abs(t) >= epsilon) {
+                    sum += t
+                    lastAddedTerm = t
+                    count++
+                    t = t * (-1.0) / (x * x) * (2.0 * n + 1) / (2.0 * n + 3)
+                    n++
+                }
+                termForDisplay = t
+
+                resultText = """
+                    Сумма ряда: ${"%.8f".format(sum)}
+                    Последнее добавленное слагаемое: ${"%.8f".format(lastAddedTerm)}
+                    Слагаемое, на котором остановились (< ε): ${"%.8f".format(termForDisplay)}
+                    Количество итераций цикла: $count
+                """.trimIndent()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
